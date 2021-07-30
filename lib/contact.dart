@@ -6,15 +6,15 @@ import 'package:flutter/services.dart';
 class Photo {
   final Uri _uri;
   final bool _isFullSize;
-  Uint8List _bytes;
+  Uint8List? _bytes;
 
   /// Gets the bytes of the photo.
-  Uint8List get bytes => _bytes;
+  Uint8List? get bytes => _bytes;
 
   Photo(this._uri, {bool isFullSize = false}) : _isFullSize = isFullSize;
 
   /// Read async the bytes of the photo.
-  Future<Uint8List> _readBytes() async {
+  Future<Uint8List?> _readBytes() async {
     if (this._uri != null && this._bytes == null) {
       var photoQuery = new ContactPhotoQuery();
       this._bytes =
@@ -26,7 +26,7 @@ class Photo {
 
 /// A contact's photo query
 class ContactPhotoQuery {
-  static ContactPhotoQuery _instance;
+  static ContactPhotoQuery? _instance;
   final MethodChannel _channel;
 
   factory ContactPhotoQuery() {
@@ -36,7 +36,7 @@ class ContactPhotoQuery {
           const StandardMethodCodec());
       _instance = new ContactPhotoQuery._private(methodChannel);
     }
-    return _instance;
+    return _instance!;
   }
 
   ContactPhotoQuery._private(this._channel);
@@ -46,7 +46,7 @@ class ContactPhotoQuery {
   /// parameter [fullSize] must be set to true. By default
   /// the returned photo is the thumbnail representation of
   /// the contact's photo.
-  Future<Uint8List> queryContactPhoto(Uri uri, {bool fullSize = false}) async {
+  Future<Uint8List?> queryContactPhoto(Uri uri, {bool fullSize = false}) async {
     return await _channel.invokeMethod(
         "getContactPhoto", {"photoUri": uri.path, "fullSize": fullSize});
   }
@@ -54,24 +54,24 @@ class ContactPhotoQuery {
 
 /// A contact of yours
 class Contact {
-  String _fullName;
-  String _firstName;
-  String _lastName;
-  String _address;
-  Photo _thumbnail;
-  Photo _photo;
+  String? _fullName;
+  String? _firstName;
+  String? _lastName;
+  String? _address;
+  Photo? _thumbnail;
+  Photo? _photo;
 
   Contact(String address,
-      {String firstName,
-      String lastName,
-      String fullName,
-      Photo thumbnail,
-      Photo photo}) {
+      {String? firstName,
+      String? lastName,
+      String? fullName,
+      Photo? thumbnail,
+      Photo? photo}) {
     this._address = address;
     this._firstName = firstName;
     this._lastName = lastName;
     if (fullName == null) {
-      this._fullName = _firstName + " " + _lastName;
+      this._fullName = _firstName! + " " + _lastName!;
     } else {
       this._fullName = fullName;
     }
@@ -79,7 +79,7 @@ class Contact {
     this._photo = photo;
   }
 
-  Contact.fromJson(String address, Map data) {
+  Contact.fromJson(String address, Map? data) {
     this._address = address;
     if (data == null) return;
     if (data.containsKey("first")) {
@@ -100,21 +100,21 @@ class Contact {
   }
 
   /// Gets the full name of the [Contact]
-  String get fullName => this._fullName;
+  String? get fullName => this._fullName;
 
-  String get firstName => this._firstName;
+  String? get firstName => this._firstName;
 
-  String get lastName => this._lastName;
+  String? get lastName => this._lastName;
 
   /// Gets the address of the [Contact] (the phone number)
-  String get address => this._address;
+  String? get address => this._address;
 
   /// Gets the full size photo of the [Contact] if any, otherwise returns null.
-  Photo get photo => this._photo;
+  Photo? get photo => this._photo;
 
   /// Gets the thumbnail representation of the [Contact] photo if any,
   /// otherwise returns null.
-  Photo get thumbnail => this._thumbnail;
+  Photo? get thumbnail => this._thumbnail;
 }
 
 /// Called when sending SMS failed
@@ -122,7 +122,7 @@ typedef void ContactHandlerFail(Object e);
 
 /// A contact query
 class ContactQuery {
-  static ContactQuery _instance;
+  static ContactQuery? _instance;
   final MethodChannel _channel;
   static Map<String, Contact> queried = {};
   static Map<String, bool> inProgress = {};
@@ -133,12 +133,12 @@ class ContactQuery {
           "plugins.babariviere.com/queryContact", const JSONMethodCodec());
       _instance = new ContactQuery._private(methodChannel);
     }
-    return _instance;
+    return _instance!;
   }
 
   ContactQuery._private(this._channel);
 
-  Future<Contact> queryContact(String address) async {
+  Future<Contact?> queryContact(String? address) async {
     if (address == null) {
       throw ("address is null");
     }
@@ -153,10 +153,10 @@ class ContactQuery {
         (dynamic val) async {
       Contact contact = new Contact.fromJson(address, val);
       if (contact.thumbnail != null) {
-        await contact.thumbnail._readBytes();
+        await contact.thumbnail!._readBytes();
       }
       if (contact.photo != null) {
-        await contact.photo._readBytes();
+        await contact.photo!._readBytes();
       }
       queried[address] = contact;
       inProgress[address] = false;
@@ -167,12 +167,12 @@ class ContactQuery {
 
 /// Class that represents the data of the device's owner.
 class UserProfile {
-  String _fullName;
-  Photo _photo;
-  Photo _thumbnail;
-  List<String> _addresses;
+  String? _fullName;
+  Photo? _photo;
+  Photo? _thumbnail;
+  List<String>? _addresses;
 
-  UserProfile() : _addresses = new List<String>();
+  UserProfile() : _addresses = <String>[];
 
   UserProfile._fromJson(Map data) {
     if (data.containsKey("name")) {
@@ -190,23 +190,23 @@ class UserProfile {
   }
 
   /// Gets the full name of the [UserProfile]
-  String get fullName => _fullName;
+  String? get fullName => _fullName;
 
   /// Gets the full size photo of the [UserProfile] if any,
   /// otherwise returns null.
-  Photo get photo => _photo;
+  Photo? get photo => _photo;
 
   /// Gets the thumbnail representation of the [UserProfile] photo if any,
   /// otherwise returns null.
-  Photo get thumbnail => _thumbnail;
+  Photo? get thumbnail => _thumbnail;
 
   /// Gets the collection of phone numbers of the [UserProfile]
-  List<String> get addresses => _addresses;
+  List<String>? get addresses => _addresses;
 }
 
 /// Used to get the user profile
 class UserProfileProvider {
-  static UserProfileProvider _instance;
+  static UserProfileProvider? _instance;
   final MethodChannel _channel;
 
   factory UserProfileProvider() {
@@ -215,7 +215,7 @@ class UserProfileProvider {
           "plugins.babariviere.com/userProfile", const JSONMethodCodec());
       _instance = new UserProfileProvider._private(methodChannel);
     }
-    return _instance;
+    return _instance!;
   }
 
   UserProfileProvider._private(this._channel);
@@ -230,10 +230,10 @@ class UserProfileProvider {
       else {
         var userProfile = new UserProfile._fromJson(val);
         if (userProfile.thumbnail != null) {
-          await userProfile.thumbnail._readBytes();
+          await userProfile.thumbnail!._readBytes();
         }
         if (userProfile.photo != null) {
-          await userProfile.photo._readBytes();
+          await userProfile.photo!._readBytes();
         }
         return userProfile;
       }

@@ -5,12 +5,17 @@ author: "geordyvancutsem <geordyvc@gmail.com>"
 homepage: "https://github.com/geordyvcErasmus/flutter_sms"
 repository: "https://github.com/geordyvcErasmus/flutter_sms"
 
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: ">=1.20.0"
+
+
 dependencies:
   flutter:
     sdk: flutter
 
-environment:
-  sdk: ">=1.19.0 <3.0.0"
+
 
 analyzer:
   strong-mode: true
